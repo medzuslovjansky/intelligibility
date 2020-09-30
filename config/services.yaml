@@ -1,0 +1,79 @@
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+imports:
+    - { resource: '../translations/config/translations.yaml' }
+
+parameters:
+    locale: 'ru'
+    app_locales: en|ru|hu
+    master_domain: "%env(MASTER_DOMAIN)%"
+    scheme_domain: "%env(SCHEME_DOMAIN)%"
+    free_hiring: false
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false       # Allows optimizing the container by removing unused services; this also means
+                            # fetching services directly from the container via $container->get() won't work.
+                            # The best practice is to be explicit about your dependencies anyway.
+        bind:
+            $imgDirectory: '%kernel.project_dir%/public/uploads/images'
+            $fileDirectory: '%kernel.project_dir%/public/uploads/files'
+            $kernelDir: '%kernel.project_dir%'
+            $masterDomain: '%master_domain%'
+            $schemeDomain: '%scheme_domain%'
+            $freeHiring: '%free_hiring%'
+
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+
+    Intelligibility\CoreBundle\:
+        resource: '../src/CoreBundle/*'
+        exclude: '../src/CoreBundle/{Entity,Enum}'
+
+    Intelligibility\PortalBundle\:
+        resource: '../src/PortalBundle/*'
+        exclude: '../src/PortalBundle/{Entity,Enum}'
+
+    Intelligibility\AdminBundle\:
+        resource: '../src/AdminBundle/*'
+        exclude: '../src/AdminBundle/{Entity,Enum}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    Intelligibility\PortalBundle\Controller\:
+        resource: '../src/PortalBundle/Controller'
+        tags: ['controller.service_arguments']
+
+    # please note that last definitions always *replace* previous ones
+    Intelligibility\CoreBundle\Util\LocaleService:
+        arguments: [ '%app_locales%', '%locale%','@request_stack']
+
+#Translations
+    Intelligibility\CoreBundle\Util\Translation\Extractor\FormExtractor:
+        arguments: ['%kernel.project_dir%']
+        tags:
+            - { name: 'translation.extractor', alias: 'form' }
+            - { name: 'container.no_preload' }
+    Intelligibility\CoreBundle\Util\Translation\Extractor\FormOptionsExtractor:
+        arguments: ['%kernel.project_dir%']
+        tags:
+            - { name: 'translation.extractor', alias: 'form_option' }
+            - { name: 'container.no_preload' }
+    Intelligibility\CoreBundle\Util\Translation\Extractor\ControllerExtractor:
+        arguments: ['%kernel.project_dir%']
+        tags:
+            - { name: 'translation.extractor', alias: 'controller' }
+            - { name: 'container.no_preload' }
+    Intelligibility\CoreBundle\Util\Translation\Extractor\ListExtractor:
+        arguments: ['%translation_list_extractor%']
+        tags:
+            - { name: 'translation.extractor', alias: 'lists' }
+    Intelligibility\CoreBundle\Util\Translation\Extractor\ConstEnumExtractor:
+        arguments: ['%kernel.project_dir%']
+        tags:
+            - { name: 'translation.extractor', alias: 'enum' }
+            - { name: 'container.no_preload' }

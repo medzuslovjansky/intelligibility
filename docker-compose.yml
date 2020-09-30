@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+
+  nginx:
+    image: nginx:1.17
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./oam/nginx/config/nginx_portal.conf:/etc/nginx/conf.d/nginx_portal.conf
+      - ./oam/nginx/config/nginx_admin.conf:/etc/nginx/conf.d/nginx_admin.conf
+      - .:/app
+    depends_on:
+      - php
+    networks:
+      - internal
+  php:
+    build: oam/php/config/
+    ports:
+      - "2323:22"
+    volumes:
+      - .:/app
+      - ./oam/php/config/config.ini:/usr/local/etc/php/conf.d/config.ini
+    environment:
+      PHP_IDE_CONFIG: "serverName=intelligibility.local"
+      XDEBUG_CONFIG: "remote_host=192.168.220.1"
+    networks:
+      - internal
+  encore:
+    image: node:10-alpine
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["yarn"]
+
+networks:
+  internal:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.220.0/28

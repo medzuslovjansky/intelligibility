@@ -1,0 +1,3 @@
+controllers_portal:
+    resource: ../../../src/PortalBundle/Controller/
+    type: annotation

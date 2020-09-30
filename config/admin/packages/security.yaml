@@ -1,0 +1,50 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        # https://symfony.com/doc/current/security/user_provider.html
+        # In this example, users are stored via Doctrine in the database
+        # To see the users at src/App/DataFixtures/ORM/LoadFixtures.php
+        # To load users from somewhere else: https://symfony.com/doc/current/security/user_provider.html#creating-a-custom-user-provider
+        database_users:
+            entity: { class: Intelligibility\AdminBundle\Entity\BackendUser, property: email }
+    encoders:
+        # Our user class and the algorithm we'll use to encode passwords
+        # 'auto' means to let Symfony choose the best possible password hasher (Argon2 or Bcrypt)
+        # https://symfony.com/doc/current/security.html#c-encoding-passwords
+        Intelligibility\AdminBundle\Entity\BackendUser:
+            algorithm:   'sodium'
+            time_cost:    48
+            memory_cost:  32384
+    role_hierarchy:
+        ROLE_ADMIN:       ROLE_ADMIN
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            anonymous: true
+            lazy: true
+            pattern: ^/
+            logout:       true
+
+            # activate different ways to authenticate
+
+            # http_basic: true
+            # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
+            guard:
+                authenticators:
+                    - Intelligibility\AdminBundle\Security\LoginFormAuthenticator
+#            https://symfony.com/doc/current/security/remember_me.html
+            remember_me:
+                secret:   '%kernel.secret%'
+                lifetime: 1209600 # 2 week in seconds
+                path:     /
+                httponly: true
+                samesite: strict
+
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        - { path: ^/login, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/*, role: ROLE_ADMIN_USER }

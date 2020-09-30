@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome!{% endblock %} Admin</title>
+    {% block stylesheets %}
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+        <link href="{{ asset('build/css/admin.css') }}" rel="stylesheet"/>
+    {% endblock %}
+</head>
+<body>
+
+
+{% block bodyWrapperEnd %}{% endblock %}
+{% block javascripts %}
+    <script src="{{ asset('build/js/common.js') }}"></script>
+    {% block jsExtra %}{% endblock %}
+{% endblock %}
+{% block messages %}
+    <div class="main-message-area">
+        {% for message in app.flashes(constant('Intelligibility\\CoreBundle\\Controller\\MainController::INFO')) %}
+            <span class="alert-notice-message">{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes(constant('Intelligibility\\CoreBundle\\Controller\\MainController::ERROR')) %}
+            <span class="alert-error-message">{{ message }}</span>
+        {% endfor %}
+        {% for message in app.flashes(constant('Intelligibility\\CoreBundle\\Controller\\MainController::SUCCESS')) %}
+            <span class="alert-success-message">{{ message }}</span>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+</body>
+</html>

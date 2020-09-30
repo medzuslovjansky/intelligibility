@@ -1,0 +1,5 @@
+parameters:
+  translation_list_extractor:
+    whitelist:
+      messages: []
+    blackList: []
